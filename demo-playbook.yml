@@ -1,0 +1,22 @@
+---
+- hosts: containers
+  connection: docker
+  tasks:
+    - name: install chronyd
+      yum:
+        name: chrony
+        state: installed
+    - name: Modify Chrony config
+      replace: 
+        dest: /etc/chrony.conf
+        regexp: "0.centos.pool.ntp.org"
+        replace: "{{ ntp_server }}"
+      notify:
+        - Restart chronyd
+  vars:
+    ntp_server: ntp1.jst.mfeed.ad.jp
+  handlers:
+    - name: Restart chronyd
+      systemd:
+        name: chronyd
+        state: restarted

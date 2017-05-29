@@ -1,0 +1,15 @@
+---
+- hosts: containers
+  connection: docker
+  tasks:
+    - name: install vim, sshd
+      yum:
+        name: "{{ item }}"
+      with_items:
+        - vim
+        - openssh-server
+    - name: start sshd
+      systemd:
+        name: sshd
+        state: started
+
