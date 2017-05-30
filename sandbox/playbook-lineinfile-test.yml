@@ -1,0 +1,8 @@
+---
+- hosts: containers
+  connection: docker
+  tasks:
+    - name: lineinffile test
+      lineinfile:
+        dest: ~/.bashrc
+        line: echo hello

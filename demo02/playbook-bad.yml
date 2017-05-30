@@ -1,0 +1,14 @@
+---
+- hosts: containers
+  connection: docker
+  tasks:
+    - name: Backup epel repo config
+      copy:
+        remote_src: True
+        src: /etc/yum.repos.d/epel.repo
+        dest: /etc/yum.repos.d/epel.repo.default
+        force: no
+    
+    - name: Modify epel's priorities
+      command: "perl -pi -e 's|^gpgcheck=.*|$&\npriority=9|' /etc/yum.repos.d/epel.repo"
+
