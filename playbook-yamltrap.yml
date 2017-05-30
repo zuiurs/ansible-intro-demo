@@ -1,0 +1,14 @@
+---
+- hosts: containers
+  connection: docker
+  vars:
+    a: hello
+    b: world
+  tasks:
+    - debug:
+        msg: "{{ a }}"
+        # msg: {{ a }}
+    - debug:
+        msg: "{{ a }} & {{ b }}"
+        # msg: {{ a }} & {{ b }}
+        # msg: "{{ a }}" & "{{ b }}"
