@@ -1,0 +1,42 @@
+---
+- hosts: containers
+  connection: docker
+  tasks:
+    - name: install chronyd
+      yum:
+        name: chrony
+        state: installed
+    - name: Backup Chrony config
+      copy:
+        remote_src: True
+        force: no
+        src: /etc/chrony.conf
+        dest: /etc/chrony.conf.default
+    - name: Modify Chrony config
+      replace: 
+        dest: /etc/chrony.conf
+        regexp: "0.centos.pool.ntp.org"
+        replace: "{{ ntp_server }}"
+    - name: Restart chronyd
+      systemd:
+        name: chronyd
+        state: restarted
+    - name: Check ntp server replaced
+      shell: "diff /etc/chrony.conf{.default,}"
+      args:
+        executable: /bin/bash
+      register: result
+      changed_when: False
+      failed_when: result.rc > 1
+    - name: "diff /etc/chrony.conf{.default,}"
+      debug:
+        var: result.stdout_lines
+    - name: Check chrony sources changed
+      shell: "chronyc sources"
+      register: result
+      changed_when: False
+    - name: chronyc sources
+      debug:
+        var: result.stdout_lines
+  vars:
+    ntp_server: ntp1.jst.mfeed.ad.jp

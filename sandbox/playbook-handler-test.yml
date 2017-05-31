@@ -1,0 +1,39 @@
+---
+# chronydをインストールしてnotify
+# 設定を変更してnotify
+# handlerは最後に実行されるので起動はまだ
+# そのためchronyc sourcesを実行してもエラーになるはず
+# するとhandlerが実行されない
+# 2回目の実行ではそもそもnotifyしているタスクはchangedにならない
+# 結果としてhandlerは一生呼ばれない
+- hosts: containers
+  connection: docker
+  tasks:
+    - name: Install chronyd
+      yum:
+        name: chrony
+        state: installed
+      notify:
+        - Restart chronyd
+
+    - name: Modify Chrony config
+      replace: 
+        dest: /etc/chrony.conf
+        regexp: "0.centos.pool.ntp.org"
+        replace: "{{ ntp_server }}"
+      notify:
+        - Restart chronyd
+
+    - name: Chrony check
+      command: chronyc sources
+      register: result
+      changed_when: False
+
+  vars:
+    ntp_server: ntp1.jst.mfeed.ad.jp
+
+  handlers:
+    - name: Restart chronyd
+      systemd:
+        name: chronyd
+        state: restarted
